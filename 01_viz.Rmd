@@ -86,9 +86,10 @@ weather_df |>
   geom_hex()
 ```
 
-#Learning assessment - do this 
+# Learning assessment - do this 
 
-# Histogram 
+# Univariate Plots 
+## Histogram 
 ```{r}
 weather_df |> 
   ggplot(aes(x = tmax)) + 
@@ -108,5 +109,46 @@ weather_df |>
   ggplot(aes(x = tmax, fill = name)) + 
   geom_density(alpha = .4, adjust = .5, color = "blue")
 ```
+
+## Box Plots 
+
+```{r}
+weather_df |> 
+  ggplot(aes(y = tmax)) +
+  geom_boxplot()
+```
+Showing distribution of temperatures 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+Add name variable on x axis, do three separate plots for each of the name variables, compare 
+
+## Violin Plots 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = name, y = tmax)) +
+  geom_violin()
+```
+Same as box plot, but now violin. Helpful for some distribution types, eg bimodal distributions are hidden by box plots 
+
+## Ridge Plots 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmax)) +
+  geom_density()
+```
+This is overall density of everything 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmax, y = name)) +
+  geom_density_ridges()
+```
+Density plots, but using ridges to separate out in vertical direction. Helpful to see what is going on if you have a lot of categories (because in density plot they all overlap)
 
 
