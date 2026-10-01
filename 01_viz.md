@@ -265,3 +265,31 @@ weather_df |>
 plots, but using ridges to separate out in vertical direction. Helpful
 to see what is going on if you have a lot of categories (because in
 density plot they all overlap)
+
+# Save some plots
+
+``` r
+ggp_weather = 
+weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_point(aes(size = prcp), alpha = 0.5) +
+  facet_grid(.~name)
+
+ggp_weather
+```
+
+    ## Warning: Removed 19 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](01_viz_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
+ggsave("images/ggp_weather.pdf", ggp_weather)
+```
+
+    ## Saving 7 x 5 in image
+
+    ## Warning: Removed 19 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+Saving plot, subdirectory/name of saved plot, which plot you’re saving
