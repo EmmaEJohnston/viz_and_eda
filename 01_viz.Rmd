@@ -165,3 +165,14 @@ ggp_weather
 ggsave("images/ggp_weather.pdf", ggp_weather)
 ```
 Saving plot, subdirectory/name of saved plot, which plot you're saving 
+
+```{r fig.width= 12, fig.height= 12}
+weather_df |> 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_point()
+```
+When you knit, this creates a figure that is really big (12 x 12), and then shrunk it into a frame. That is why fonts are so small. In future, Jeff will use specific set of settings for plots at beginning of all Rmd docs 
+
+
+
+

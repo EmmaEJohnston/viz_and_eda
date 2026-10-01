@@ -293,3 +293,17 @@ ggsave("images/ggp_weather.pdf", ggp_weather)
     ## (`geom_point()`).
 
 Saving plot, subdirectory/name of saved plot, which plot you’re saving
+
+``` r
+weather_df |> 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_point()
+```
+
+    ## Warning: Removed 17 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](01_viz_files/figure-gfm/unnamed-chunk-22-1.png)<!-- --> When you
+knit, this creates a figure that is really big (12 x 12), and then
+shrunk it into a frame. That is why fonts are so small. In future, Jeff
+will use specific set of settings for plots at beginning of all Rmd docs
