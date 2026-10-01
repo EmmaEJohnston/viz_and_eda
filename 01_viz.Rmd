@@ -1,0 +1,112 @@
+---
+title: "01_viz"
+author: "Emma"
+date: "2026-10-01"
+output: github_document
+---
+
+```{r message = F}
+library(tidyverse)
+library(ggridges)
+```
+
+```{r}
+library(p8105.datasets)
+data("weather_df")
+```
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax))
+```
+This creates a blank scatterplot, no geom specified 
+
+```{r}
+ggplot(weather_df, aes(x = tmin, y = tmax)) + 
+  geom_point()
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point()
+```
+Better way to write code for the same scatterplot
+
+```{r}
+ggp_weather = 
+  weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) 
+
+ggp_weather + geom_point()
+```
+Saving plot, not Jeff's default for making plots 
+
+# Advanced Scatterplot
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name))
+```
+Adding color based on name variable 
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .5) +
+  geom_smooth(se = FALSE)
+```
+Adding curve and making dots slightly transparent
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  facet_grid(. ~ name)
+```
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point(aes(size = prcp), alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  facet_grid(. ~ name)
+```
+Looking at times of year and precipitation 
+
+```{r}
+weather_df |>  
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_smooth(se = FALSE) 
+```
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmax, y = tmin)) + 
+  geom_hex()
+```
+
+#Learning assessment - do this 
+
+# Histogram 
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmax)) + 
+  geom_histogram()
+```
+
+Adding color:
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmax, fill = name)) + 
+  geom_histogram(position = "dodge", binwidth = 2)
+```
+
+Kind of hard to understand, so make density plots instead:
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmax, fill = name)) + 
+  geom_density(alpha = .4, adjust = .5, color = "blue")
+```
+
+
