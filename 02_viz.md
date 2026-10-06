@@ -283,3 +283,60 @@ ggp_seasonal =
 
 ![](02_viz_files/figure-gfm/unnamed-chunk-10-1.png)<!-- --> Change the
 legend position to make less crowded.
+
+## Data manipulation
+
+Start with factors. Factor variables are doing some important stuff!
+
+boxplots!
+
+``` r
+weather_df |> 
+  mutate(name = factor(name)) |> ## R does this in the background automatically, don't do
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 17 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+![](02_viz_files/figure-gfm/unnamed-chunk-11-1.png)<!-- --> Puts factor
+variables alphabetically automatically along axes. you can be more
+explicit.
+
+``` r
+weather_df |> 
+  mutate(name = fct_relevel(name, c("Molokai_HI", "CentralPark_NY", "Waterhole_WA"))) |>
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 17 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+![](02_viz_files/figure-gfm/unnamed-chunk-12-1.png)<!-- --> You started
+with some levels, what order do you want them in? This puts molokai
+first, CP second, WW third
+
+``` r
+weather_df |> 
+  mutate(name = fct_reorder(name, tmax)) |>
+  ggplot(aes(x = name, y = tmax)) +
+  geom_boxplot()
+```
+
+    ## Warning: There was 1 warning in `mutate()`.
+    ## ℹ In argument: `name = fct_reorder(name, tmax)`.
+    ## Caused by warning:
+    ## ! `fct_reorder()` removing 17 missing values.
+    ## ℹ Use `.na_rm = TRUE` to silence this message.
+    ## ℹ Use `.na_rm = FALSE` to preserve NAs.
+
+    ## Warning: Removed 17 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+![](02_viz_files/figure-gfm/unnamed-chunk-13-1.png)<!-- --> Reorder name
+variable according to another variable (tmax). For each unique name,
+what is median tmax, and arrange those from smalles to largest.
+Reordering is not a ggplot problem. That is a data problem, so you need
+to mutate the data by reordering the factor variables.
