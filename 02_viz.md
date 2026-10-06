@@ -155,3 +155,41 @@ weather_df |>
 
 ![](02_viz_files/figure-gfm/unnamed-chunk-5-1.png)<!-- --> Have to say
 whether variable is discrete or continuous
+
+## Themes
+
+``` r
+weather_df |> 
+  ggplot(aes(x = tmax, y = tmin, color = name)) +
+  geom_point() +
+  viridis::scale_color_viridis(
+    name = "Location",
+    discrete = TRUE
+  ) +
+  theme(legend.position = "bottom") 
+```
+
+    ## Warning: Removed 17 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](02_viz_files/figure-gfm/unnamed-chunk-6-1.png)<!-- --> Changing the
+position of the legend to the bottom.
+
+``` r
+weather_df |> 
+  ggplot(aes(x = tmax, y = tmin, color = name)) +
+  geom_point() +
+  viridis::scale_color_viridis(
+    name = "Location",
+    discrete = TRUE
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom") 
+```
+
+    ## Warning: Removed 17 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](02_viz_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> bw gives you
+white background, grey lines. Can also do theme_minimal (changes plot
+background), theme_classic (no lines inside plot).

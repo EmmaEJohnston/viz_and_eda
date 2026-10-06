@@ -108,5 +108,49 @@ weather_df |>
 ```
 Have to say whether variable is discrete or continuous 
 
+## Themes 
 
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmax, y = tmin, color = name)) +
+  geom_point() +
+  viridis::scale_color_viridis(
+    name = "Location",
+    discrete = TRUE
+  ) +
+  theme(legend.position = "bottom") 
+```
+Changing the position of the legend to the bottom. 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmax, y = tmin, color = name)) +
+  geom_point() +
+  viridis::scale_color_viridis(
+    name = "Location",
+    discrete = TRUE
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom") 
+```
+bw gives you white background, grey lines. Can also do theme_minimal (no box around plot), theme_classic (no lines inside plot). HAVE to put theme_bw (or whichever) first, it overrides all other theme commands. 
+
+Update the tmax vs. date plot. 
+```{r}
+weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(se = FALSE) +
+  labs(
+    title = "Seasonal Trends in Max Temp", 
+    x = "Date",
+    y = "Max Temp",
+    caption = "Max daily temp in three weather stations in 2021 through 2023"
+  ) +
+  viridis::scale_color_viridis(
+    discrete = TRUE
+  ) + 
+  theme_minimal() + 
+  theme(legend.position = "bottom")
+```
 
