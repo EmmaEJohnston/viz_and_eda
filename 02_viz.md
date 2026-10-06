@@ -63,9 +63,12 @@ library(tidyverse)
 
 ``` r
 library(p8105.datasets)
+library(patchwork)
 
 data("weather_df") 
 ```
+
+Patchwork allows you to stitch together plots.
 
 ``` r
 weather_df |> 
@@ -191,5 +194,92 @@ weather_df |>
     ## (`geom_point()`).
 
 ![](02_viz_files/figure-gfm/unnamed-chunk-7-1.png)<!-- --> bw gives you
-white background, grey lines. Can also do theme_minimal (changes plot
-background), theme_classic (no lines inside plot).
+white background, grey lines. Can also do theme_minimal (no box around
+plot), theme_classic (no lines inside plot). HAVE to put theme_bw (or
+whichever) first, it overrides all other theme commands.
+
+Update the tmax vs. date plot.
+
+``` r
+weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  labs(
+    title = "Seasonal Trends in Max Temp", 
+    x = "Date",
+    y = "Max Temp",
+    caption = "Max daily temp in three weather stations in 2021 through 2023"
+  ) +
+  viridis::scale_color_viridis(
+    discrete = TRUE
+  ) + 
+  theme_minimal() + 
+  theme(legend.position = "bottom")
+```
+
+    ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
+
+    ## Warning: Removed 17 rows containing non-finite outside the scale range
+    ## (`stat_smooth()`).
+
+    ## Warning: Removed 17 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](02_viz_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+
+## Two more weird but useful plot things
+
+``` r
+central_park_df = 
+  weather_df |> 
+  filter(name == "CentralPark_NY")
+
+molokai_df = 
+  weather_df |> 
+  filter(name == "Molokai_HI")
+
+ggplot(molokai_df, aes(x = date, y = tmax, color = name)) +
+  geom_point() +
+  geom_line(data = central_park_df)
+```
+
+    ## Warning: Removed 1 row containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](02_viz_files/figure-gfm/unnamed-chunk-9-1.png)<!-- --> Adding two
+separate datasets into same plot. Overlaying line plot from second data
+frame onto scatter plot.
+
+Multiple panels of your different plots: Use Patchwork!
+
+``` r
+ggp_tmax_tmin = 
+  weather_df |> 
+  ggplot(aes(x = tmin, y = tmax, color = name)) +
+  geom_point() +
+  theme(legend.position = "none")
+
+ggp_prcp_density = 
+  weather_df |> 
+  filter(prcp > 0) |> 
+  ggplot(aes(x = prcp, fill = name)) +
+  geom_density(alpha = .5) +
+  theme(legend.position = "none")
+
+ggp_seasonal = 
+  weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) +
+  geom_point() +
+  theme(legend.position = "bottom")
+
+(ggp_tmax_tmin + ggp_prcp_density) / ggp_seasonal
+```
+
+    ## Warning: Removed 17 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+    ## Removed 17 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+![](02_viz_files/figure-gfm/unnamed-chunk-10-1.png)<!-- --> Change the
+legend position to make less crowded.
