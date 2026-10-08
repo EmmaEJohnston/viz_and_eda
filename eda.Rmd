@@ -204,3 +204,21 @@ weather_df |>
 ```
 24 months in each of 3 locations = 72. What is going on in January and i can compare across locations. Making it untidy here because it will be for others to view. 
 
+What about looking at this? This is a good structure for ggplot! 
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE)
+  ) |> 
+  ggplot(aes(x = month, y = mean_tmax, color = name)) + 
+  geom_point() + 
+  geom_line()
+```
+Showing that group_by and summarize make a dataframe! you can make plots with it! Sometimes cleaning it up like this can make trends more apparent (but not always). 
+
+
+
+
+
