@@ -4,3 +4,203 @@ author: "Emma"
 date: "2026-10-08"
 output: github_document
 ---
+## Exploratory data analysis
+
+The stuffy between loading data and formal analysis is "exploratory". 
+This includes: 
+
+* visualization 
+* checks for data completeness and reliability 
+* initial evaluation of hypotheses 
+* hypothesis generation 
+
+Current emphasis on creating numeric summaries. 
+
+## Grouping 
+
+Datasets often consist of groups 
+* sometimes by design 
+* sometimes implied 
+* sometimes nested 
+
+eg. treatment groups, age groups, geographic groups, family units 
+These are groups you examine visually and quantitatively. 
+
+## Grouped summaries 
+
+Quantitative comparisons across groups are informative 
+* measures center (mean, median)
+* measure of variability (SD, variance, IQR)
+
+## Use group_by() and summarize()
+
+group_by() makes grouping explicit and adds a layer to your data 
+* based on existing variables 
+* changes beahvior of some key functions 
+* almost invisibile! pay attention 
+
+summarize() allows you to compute one-number summaries 
+* based on exisiting variables 
+* most useful in conjunction with group_by()
+* produces a data frame with grouping variables and summaries 
+* easy to integrate into a pipeline 
+
+Sometimes these are used to make comparisons 
+
+## Exploratory data analysis 
+
+Most statistical tests assume you're only concerned about the current hypothesis, or that you've done appropriate adjustments for multiple comparisons. 
+
+The validity of conclusions based on these tests depends on the process that lead you to a hypothesis. 
+* with any given dataset, you can form a huge number of hypotheses 
+* can only evaluate a small number of those 
+* this can blur the line between "exploratory" and "formal" analysis 
+* the problem is sometimes referred to as the "garden of the forking paths"
+
+## Time to code!
+
+This is the code that Jeff uses at the beginning of all of his Rmd. This sets a figure width, color scheme, and theme for all of the plots made in this document. You don't need to do this, but it can be good. 
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(p8105.datasets)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+Load the weather data as well.
+
+```{r}
+data("weather_df")
+
+weather_df = 
+  weather_df |> 
+  mutate( 
+    month = lubridate::floor_date(date, unit = "month")
+    )
+  
+```
+This rounds down all dates to one day in the month (all January dates rounded down to 01/01)
+
+
+```{r}
+weather_df |> 
+  filter(prcp >0) |> 
+  ggplot(aes(x = prcp)) +
+  geom_histogram()
+```
+
+Looking for outliers/quality checking: 
+```{r}
+weather_df |> 
+  filter(prcp > 1000)
+```
+
+```{r}
+weather_df |> 
+  filter(tmax > 20, tmax <= 30) |> 
+  ggplot(aes(x = tmax, y = tmin, color = name, shape = name)) +
+  geom_point()
+```
+The values here are not continuously distributed (we see vertical bars) in both NYC and HI, but not WA. Indicates different temp collection methods across locations. Useful to know! An example of combining visualization with looking at numbers - plots can be informative.
+
+## Group
+```{r}
+weather_df |> 
+  group_by(name)
+```
+Defines three groups by name 
+
+```{r}
+weather_df |> 
+  group_by(name, month)
+```
+72 groups --> 12 months in 3 years x 3 
+
+## summarize 
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  summarize(count = n())
+```
+
+```{r}
+weather_df |> 
+  count(name, month)
+```
+this does same thing 
+
+```{r}
+weather_df |> 
+  group_by(month) |> 
+  summarize(
+    count = n(),
+    n_days = n_distinct(date))
+```
+How many observations are there in 2021 across three weather stations - how many distinct days? 
+
+DON'T do this!!!! 
+```{r, eval = FALSE}
+weather_df |> 
+  pull(tmax) |> 
+  summary()
+```
+Can't do anything useful with this object. Not a dataframe. Don't use tables 
+
+DO this instead: 
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE), 
+    median_tmax = median(tmax, na.rm = TRUE),
+    sd_prcp = sd(prcp, na.rm = TRUE), 
+    q25_prcp = quantile(prcp, 0.25, na.rm = TRUE), 
+    q95_prcp = quantile(prcp, 0.95, na.rm = TRUE)
+  )
+```
+Computes mean tmax value in each of the weather stations I'm interested in. Can choose what you're interested in reporting and make the summarize tables however you want. Also looking at 25% percentile (0 because most of the time it is not raining) and 95% percentile. 
+
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE), 
+    median_tmax = median(tmax, na.rm = TRUE),
+    sd_prcp = sd(prcp, na.rm = TRUE), 
+    q25_prcp = quantile(prcp, 0.25, na.rm = TRUE), 
+    q95_prcp = quantile(prcp, 0.95, na.rm = TRUE)
+  ) |> 
+  knitr::kable(digits = 2)
+```
+This makes a nicely formatted table, good if you're making for someone else to look at. 
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  summarize(
+    mean_tmax = mean(tmax, na.rm = TRUE)
+  ) |> 
+  pivot_wider(
+    names_from = name, 
+    values_from = mean_tmax
+  ) |> 
+  knitr::kable(digits = 2)
+```
+24 months in each of 3 locations = 72. What is going on in January and i can compare across locations. Making it untidy here because it will be for others to view. 
+
