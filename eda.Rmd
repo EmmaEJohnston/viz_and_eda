@@ -64,6 +64,7 @@ This is the code that Jeff uses at the beginning of all of his Rmd. This sets a 
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(p8105.datasets)
+library(haven)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -317,7 +318,47 @@ weather_df |>
     mean_temp_change = mean(temp_change, na.rm = TRUE)
     )
 ```
-This does same thing without creating intermediate variables 
+This does same thing without creating intermediate variables. 
+
+Fun fact! 
+eej2124@cumc.columbia.edu
+abc1224@cumc.columbia.edu
+cde2344@cumc.columbia.edu
+option shift lets you highlight multiple lines and edit in exact same way 
+
+## Revisit some examples 
+
+import, clean, tidy, etc the pulse data, and compute mean and median BDI score at each visit. 
+
+```{r}
+pulse_df =
+  read_sas("data/public_pulse_data.sas7bdat") |> 
+  janitor::clean_names() |> 
+  pivot_longer(
+    bdi_score_bl:bdi_score_12m,
+    names_to = "visit", 
+    names_prefix = "bdi_score_",
+    values_to = "bdi_score"
+  ) |> 
+  select(id, visit, everything()) |> #reordering, id first, visit second
+  mutate(
+    visit = replace(visit, visit == "bl", "00m") #replace bl with 00m
+  ) 
+
+
+pulse_df |> 
+  group_by(visit) |> 
+  summarize(
+    mean_bdi = mean(bdi_score, na.rm = TRUE), 
+    median_bdi = median(bdi_score, na.rm = TRUE)
+  ) |> 
+  knitr::kable(digits = 2)
+```
+
+
+In the FAS data, compute mean outcome (ears only) across dose and day of treatment; show in a reader-friendly table 
+
+
 
 
 
