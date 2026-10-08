@@ -219,6 +219,105 @@ weather_df |>
 Showing that group_by and summarize make a dataframe! you can make plots with it! Sometimes cleaning it up like this can make trends more apparent (but not always). 
 
 
+```{r}
+weather_df |> 
+  mutate(center_tmax = tmax - mean(tmax, na.rm = TRUE)) |> 
+  ggplot(aes(x = date, y = center_tmax, color = name)) +
+  geom_point()
+```
+This computes avg t max and subtracts it from tmax - centers it. 
+
+But maybe you want to compute group specific mean... 
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  mutate(center_tmax = tmax - mean(tmax, na.rm = TRUE)) |> 
+  ggplot(aes(x = date, y = center_tmax, color = name)) +
+  geom_point()
+```
+Mutate now takes into account specific grouping - location by location
+
+What about "window" functions?
+
+Try to rank things! 
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  mutate(temp_rank = min_rank(tmax))
+```
+Ranking each t max variable, putting in order from smallest to largest 
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  mutate(temp_rank = min_rank(tmax)) |> 
+  filter(temp_rank < 2)
+```
+Looking at coldest day in NYC 
+
+```{r}
+weather_df |> 
+  group_by(name, month) |> 
+  mutate(temp_rank = min_rank(desc(tmax))) |> 
+  filter(temp_rank < 2)
+```
+Going from warmest to coldest now 
+
+Lead and lag functions: 
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  mutate(
+    lagged_tmax = lag(tmax)
+  )
+```
+one day lag tmax - what was yesterday's tmax? copying coluumn, moving it over, moving it down by one. Good for knowing effect for today but also controlling for recent exposures. Groups are important here, not lagging between named groups (ie NA in the first row of HI and WA, not carrying over from NYC) 
+
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  mutate(
+    lagged_tmax = lag(tmax, 3)
+  )
+```
+Lagging by 3
+
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  mutate(
+    lagged_tmax = lag(tmax, 3), 
+    lead_tmax = lead(tmax, 3)
+  )
+```
+Lead does the opposite 
+
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  mutate(
+    lagged_tmax = lag(tmax), 
+    temp_change = tmax - lagged_tmax
+  ) |> 
+  summarize( 
+    sd_temp_change = sd(temp_change, na.rm = TRUE),
+    mean_temp_change = mean(temp_change, na.rm = TRUE)
+    )
+```
+Temperature change between days. computing single number summaries 
+
+```{r}
+weather_df |> 
+  group_by(name) |> 
+  mutate(
+    temp_change = tmax - lag(tmax)
+  ) |> 
+  summarize( 
+    sd_temp_change = sd(temp_change, na.rm = TRUE),
+    mean_temp_change = mean(temp_change, na.rm = TRUE)
+    )
+```
+This does same thing without creating intermediate variables 
 
 
 
