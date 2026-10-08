@@ -608,4 +608,112 @@ weather_df |>
     ## 2 Molokai_HI               1.24        -0.000688
     ## 3 Waterhole_WA             3.04        -0.00155
 
-This does same thing without creating intermediate variables
+This does same thing without creating intermediate variables.
+
+Fun fact! <eej2124@cumc.columbia.edu> <abc1224@cumc.columbia.edu>
+<cde2344@cumc.columbia.edu> option shift lets you highlight multiple
+lines and edit in exact same way
+
+## Revisit some examples
+
+import, clean, tidy, etc the pulse data, and compute mean and median BDI
+score at each visit.
+
+``` r
+pulse_df =
+  read_sas("data/public_pulse_data.sas7bdat") |> 
+  janitor::clean_names() |> 
+  pivot_longer(
+    bdi_score_bl:bdi_score_12m,
+    names_to = "visit", 
+    names_prefix = "bdi_score_",
+    values_to = "bdi_score"
+  ) |> 
+  select(id, visit, everything()) |> #reordering, id first, visit second
+  mutate(
+    visit = replace(visit, visit == "bl", "00m") #replace bl with 00m
+  ) 
+
+
+pulse_df |> 
+  group_by(visit) |> 
+  summarize(
+    mean_bdi = mean(bdi_score, na.rm = TRUE), 
+    median_bdi = median(bdi_score, na.rm = TRUE)
+  ) |> 
+  knitr::kable(digits = 2)
+```
+
+| visit | mean_bdi | median_bdi |
+|:------|---------:|-----------:|
+| 00m   |     7.99 |          6 |
+| 01m   |     6.05 |          4 |
+| 06m   |     5.67 |          4 |
+| 12m   |     6.10 |          4 |
+
+In the FAS data, compute mean outcome (ears only) across dose and day of
+treatment; show in a reader-friendly table
+
+``` r
+pups_df = 
+  read_csv("data/FAS_pups.csv", skip = 3, na = c("", ".", "NA")) |> 
+  janitor::clean_names()  
+```
+
+    ## Rows: 313 Columns: 6
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (1): Litter Number
+    ## dbl (5): Sex, PD ears, PD eyes, PD pivot, PD walk
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+litters_df = 
+  read_csv("data/FAS_litters.csv", na = c("", ".", "NA")) |> 
+  janitor::clean_names() |> 
+  separate(group, into = c("dose", "day_of_tx"), 3) #split at 3rd location
+```
+
+    ## Rows: 49 Columns: 8
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (2): Group, Litter Number
+    ## dbl (6): GD0 weight, GD18 weight, GD of Birth, Pups born alive, Pups dead @ ...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+fas_df = 
+  left_join(pups_df, litters_df, by = "litter_number") |> 
+  select(litter_number, dose, day_of_tx, everything()) |> 
+  drop_na(dose, day_of_tx) #drop to make clean table, but you should figure out why there are na 
+
+
+fas_df |> 
+  group_by(dose, day_of_tx) |> 
+  summarize(
+    mean_ears = mean(pd_ears, na.rm = TRUE)
+  ) |> 
+  pivot_wider(
+    names_from = day_of_tx, 
+    values_from = mean_ears
+  )
+```
+
+    ## `summarise()` has regrouped the output.
+    ## ℹ Summaries were computed grouped by dose and day_of_tx.
+    ## ℹ Output is grouped by dose.
+    ## ℹ Use `summarise(.groups = "drop_last")` to silence this message.
+    ## ℹ Use `summarise(.by = c(dose, day_of_tx))` for per-operation grouping
+    ##   (`?dplyr::dplyr_by`) instead.
+
+    ## # A tibble: 3 × 3
+    ## # Groups:   dose [3]
+    ##   dose    `7`   `8`
+    ##   <chr> <dbl> <dbl>
+    ## 1 Con    4.29  3.60
+    ## 2 Low    3.58  3.44
+    ## 3 Mod    3.83  3.54

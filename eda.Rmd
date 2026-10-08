@@ -358,6 +358,32 @@ pulse_df |>
 
 In the FAS data, compute mean outcome (ears only) across dose and day of treatment; show in a reader-friendly table 
 
+```{r}
+pups_df = 
+  read_csv("data/FAS_pups.csv", skip = 3, na = c("", ".", "NA")) |> 
+  janitor::clean_names()  
+  
+litters_df = 
+  read_csv("data/FAS_litters.csv", na = c("", ".", "NA")) |> 
+  janitor::clean_names() |> 
+  separate(group, into = c("dose", "day_of_tx"), 3) #split at 3rd location
+
+fas_df = 
+  left_join(pups_df, litters_df, by = "litter_number") |> 
+  select(litter_number, dose, day_of_tx, everything()) |> 
+  drop_na(dose, day_of_tx) #drop to make clean table, but you should figure out why there are na 
+
+
+fas_df |> 
+  group_by(dose, day_of_tx) |> 
+  summarize(
+    mean_ears = mean(pd_ears, na.rm = TRUE)
+  ) |> 
+  pivot_wider(
+    names_from = day_of_tx, 
+    values_from = mean_ears
+  )
+```
 
 
 
